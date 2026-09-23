@@ -1,0 +1,19 @@
+# Credenciais
+.env
+
+# Logs (Airflow e gerais)
+logs/
+*.log
+
+# Pastas de dados do Docker (Evita enviar o banco de dados inteiro)
+postgres_data/
+mysql_data/
+db_data/
+
+# Arquivos gerados pelo Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
