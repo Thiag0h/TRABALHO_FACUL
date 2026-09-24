@@ -13,9 +13,6 @@ MEU_BANCO = os.getenv('DB_NAME')
 MEU_USUARIO = os.getenv('DB_USER')
 MINHA_SENHA = os.getenv('DB_PASSWORD')
 
-import pandas as pd
-from sqlalchemy import create_engine
-
 def carregar_postgres(arquivo_parquet):
 
     caminho_s3 = arquivo_parquet
