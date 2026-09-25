@@ -28,7 +28,7 @@ def montar_params(latitude, longitude):
     return {
         "latitude": latitude,
         "longitude": longitude,
-        "daily": "temperature_2m_mean",
+        "daily": ["temperature_2m_mean", "relative_humidity_2m_mean", "wind_speed_10m_mean"],
         "past_days": 30,
         "forecast_days": 0,
     }
@@ -41,6 +41,8 @@ def get_results(zona, response_area):
     for coordenada, response in zip(zona, response_area):
         daily = response.Daily()
         daily_temperature_2m_mean = daily.Variables(0).ValuesAsNumpy()
+        daily_humidity_2m_mean = daily.Variables(1).ValuesAsNumpy()
+        daily_wind_speed_mean = daily.Variables(2).ValuesAsNumpy()
 
         daily_data = {
             "date": pd.date_range(
@@ -52,8 +54,11 @@ def get_results(zona, response_area):
         }
 
         daily_data["temperature_2m"] = daily_temperature_2m_mean
+        daily_data["humidity_2m"] = daily_humidity_2m_mean
+        daily_data["wind_speed_2m"] = daily_wind_speed_mean
         daily_data["zona"] = coordenada.zona
         daily_data["cidade"] = coordenada.cidade
+
 
         dataframes.append(pd.DataFrame(data=daily_data))
     return pd.concat(dataframes, ignore_index=True)
@@ -65,6 +70,9 @@ def coletar_dados():
     zcentro = [
         Coord("Zona Centro", "Centro", -22.90369, -43.18777),
         Coord("Zona Centro", "Gamboa", -22.89750, -43.19278),
+        Coord("Zona Centro", "Santa Teresa", -22.92180, -43.18690),
+        Coord("Zona Centro", "Catumbi", -22.91945, -43.19708),
+
     ]
     latCentro, longCentro = extração_coord(zcentro)
     paramCentro = montar_params(latCentro, longCentro)
@@ -72,21 +80,47 @@ def coletar_dados():
     dadosCentro = get_results(zcentro, responsesCentro)
 
     # Parametros Zona Sul
-    zsul = [Coord("Zona Sul", "Flamengo", -22.93560, -43.17680)]
+    zsul = [
+            Coord("Zona Sul", "Flamengo", -22.93560, -43.17680),
+            Coord("Zona Sul", "Copacabana", -22.97072, -43.18237),
+            Coord("Zona Sul", "Ipanema", -22.98360, -43.19861),
+            Coord("Zona Sul", "Botafogo", -22.94260, -43.18180),
+            Coord("Zona Sul", "Gávea", -22.97500, -43.22700),
+    ]
     latSul, longSul = extração_coord(zsul)
     paramSul = montar_params(latSul, longSul)
     responsesSul = responses(paramSul)
     dadosSul = get_results(zsul, responsesSul)
 
     # Parametros Zona Norte
-    znorte = [Coord("Zona Norte", "Maracana", -22.91180, -43.23200)]
+    znorte = [
+            Coord("Zona Norte", "Maracana", -22.91180, -43.23200),
+            Coord("Zona Norte", "Méier", -22.90173, -43.27971),
+            Coord("Zona Norte", "Madureira", -22.87166, -43.33720),
+            Coord("Zona Norte", "Ramos", -22.85940, -43.25740),
+            Coord("Zona Norte", "Maré", -22.85800, -43.24300),
+            Coord("Zona Norte", "Pavuna", -22.81219, -43.35928),
+            Coord("Zona Norte", "Ilha do Governador", -22.80580, -43.21030),
+    ]
     latNorte, longNorte = extração_coord(znorte)
     paramNorte = montar_params(latNorte, longNorte)
     responsesNorte = responses(paramNorte)
     dadosNorte = get_results(znorte, responsesNorte)
 
     # Parametros Zone Oeste
-    zoeste = [Coord("Zona Oeste", "Barra da Tijuca", -23.00000, -43.36500)]
+    zoeste = [
+            Coord("Zona Oeste", "Barra da Tijuca", -23.00000, -43.36500),
+            Coord("Zona Oeste", "Recreio dos Bandeirantes", -23.01852, -43.46340),
+            Coord("Zona Oeste", "Jacarepaguá", -22.95317, -43.37158),
+            Coord("Zona Oeste", "Vargem Grande", -22.97079, -43.49689),
+            Coord("Zona Oeste", "Bangu", -22.87531, -43.46488),
+            Coord("Zona Oeste", "Realengo", -22.88300, -43.42300),
+            Coord("Zona Oeste", "Campo Grande", -22.90200, -43.56100),
+            Coord("Zona Oeste", "Santa Cruz", -22.91763, -43.68349),
+            Coord("Zona Oeste", "Paciência", -22.89500, -43.63800),
+            Coord("Zona Oeste", "Guaratiba", -22.99058, -43.58492),
+            Coord("Zona Oeste", "Sepetiba", -22.97800, -43.69600),
+    ]
     latOeste, longOeste = extração_coord(zoeste)
     paramOeste = montar_params(latOeste, longOeste)
     responsesOeste = responses(paramOeste)

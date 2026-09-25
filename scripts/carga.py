@@ -1,43 +1,32 @@
 import pandas as pd
-import psycopg2
 from sqlalchemy import create_engine
 import os
-import urllib.parse
 from dotenv import load_dotenv
 
 load_dotenv()
 
-MEU_HOST = os.getenv('DB_HOST')
-MEU_PORT = os.getenv('DB_PORT')
-MEU_BANCO = os.getenv('DB_NAME')
-MEU_USUARIO = os.getenv('DB_USER')
-MINHA_SENHA = os.getenv('DB_PASSWORD')
+DB_HOST = os.getenv('DB_HOST')
+DB_PORT = os.getenv('DB_PORT')
+DB_NAME = os.getenv('DB_NAME')
+DB_USER = os.getenv('DB_USER')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
 
-def carregar_postgres(arquivo_parquet):
+TABELAS_POSTGRES = {
+    "mensal": "dados_mensais",
+    "semanal": "dados_semanais",
+    "diario": "dados_diarios",
+}
 
-    caminho_s3 = arquivo_parquet
-    
-    print(f"A ler o ficheiro do S3: {caminho_s3}")
-    
-    # Ler o arquivo Parquet do S3
-    df = pd.read_parquet(caminho_s3)
-    
-    # Credenciais do banco PostgreSQL 18
-    db_user = 'postgres' 
-    db_pass = '982305395'
-    db_host = 'host.docker.internal' 
-    db_port = '5432'
-    db_name = 'clima' 
-    
-    # Criar a conexão com o banco
-    string_conexao = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+def carregar_postgres(caminhos_s3):
+    string_conexao = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     engine = create_engine(string_conexao)
-    
-    nome_tabela = 'dados_climaticos'
-    
-    print(f"A inserir dados na tabela '{nome_tabela}'...")
-    
-    # Inserir no PostgreSQL
-    df.to_sql(nome_tabela, engine, if_exists='append', index=False)
-    
-    print("Carga concluída com sucesso no PostgreSQL!")
+
+    for chave, caminho_s3 in caminhos_s3.items():
+        nome_tabela = TABELAS_POSTGRES[chave]
+        print(f"Lendo {caminho_s3}...")
+        df = pd.read_parquet(caminho_s3)
+
+        print(f"Inserindo dados na tabela '{nome_tabela}'...")
+        df.to_sql(nome_tabela, engine, if_exists='replace', index=False)
+
+    print("Carga concluÃda com sucesso no PostgreSQL!")
